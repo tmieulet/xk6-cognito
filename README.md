@@ -11,12 +11,18 @@ See:
 
 ### Pre-built binaries 
 
-TODO
+``` sh
+go install go.k6.io/xk6/cmd/xk6@latest
+xk6 build master   --with github.com/tmieulet/xk6-cognito
+
+xk6 run --vus 1 --duration 2s /scripts/examples/loadTest.js
+
+```
 
 ### Build from source
 
 
-```sh
+``` sh
 git clone https://github.com/tmieulet/xk6-cognito.git && cd xk6-cognito
 docker run --rm -v $(pwd):/scripts -it --entrypoint sh golang:1.17-alpine
 
