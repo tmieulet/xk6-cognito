@@ -1,6 +1,8 @@
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable prefer-object-spread */
+// spread does not work https://github.com/grafana/k6/issues/824
 
-import { check } from 'k6';
-
+import { check, fail } from 'k6';
 
 import cognito from 'k6/x/cognito';
 
@@ -12,10 +14,14 @@ const data = new SharedArray('users', (() => JSON.parse(open('users.json'))));
 const client = cognito.connect('eu-west-1');
 
 export function auth() {
-
-
   if (data.length === 0) {
-    fail('[auth] users.json is empty');
+    // GoError & fail() do not increment a metric iteration_failed
+    // workaround : add a dummy check
+    const message = '[auth] users.json is empty';
+    check(data, {
+      [message]: () => false,
+    });
+    fail(message);
   }
 
   // Initialize the connection
@@ -36,12 +42,25 @@ export function auth() {
 
   console.log('user: ', username);
 
-  // can generate  GoError: operation error Cognito Identity Provider: RespondToAuthChallenge
-  return client.auth(
-    username,
-    password,
-    'eu-west-1_exToChangePoolId',
-    'exToChangeClientId',
-    { clientMetadata: { test: 'ok' } },
-  );
+  try {
+    const tokens = client.auth(
+      username,
+      password,
+      'eu-west-1_exToChangePoolId',
+      'exToChangeClientId',
+      { clientMetadata: { test: 'ok' } },
+    );
+    // spread does not work https://github.com/grafana/k6/issues/824
+    return Object.assign({}, { username }, tokens);
+  } catch (e) {
+    // can generate  GoError: operation error Cognito Identity Provider: RespondToAuthChallenge
+    //
+    // GoError & fail() do not increment a metric iteration_failed
+    // workaround : add a dummy check
+    const message = `[cognito] successful auth ${username}`;
+    check(e, {
+      [message]: () => false,
+    });
+    throw e;
+  }
 }

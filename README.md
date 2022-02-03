@@ -15,7 +15,7 @@ See:
 go install go.k6.io/xk6/cmd/xk6@latest
 xk6 build master   --with github.com/tmieulet/xk6-cognito
 
-xk6 run --vus 1 --duration 2s /scripts/examples/loadTest.js
+./k6 run --vus 1 --duration 2s /scripts/examples/loadTest.js
 
 ```
 
@@ -35,4 +35,4 @@ xk6 build v0.32.0  --with github.com/tmieulet/xk6-cognito="/scripts"
 
 ### Example
 
-In examples, change all ```exToChange``` then run ``` mkdir -p target && xk6 run --vus 1 --duration 2s /scripts/examples/loadTest.js```
+In examples, change all values with ```exToChange``` then run ``` mkdir -p /scripts/target && xk6 run --vus 1 --duration 2s /scripts/examples/loadTest.js```
