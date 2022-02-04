@@ -1,0 +1,46 @@
+version: '3.5'
+# From https://github.com/grafana/k6/blob/master/docker-compose.yml
+
+# stack name with docker-compose
+# docker-compose -p "grafana" up
+
+# launch a test
+# docker run --rm --network=k6  -v ./samples:/scripts loadimpact/k6:latest
+# ./k6 run  --out influxdb=http://influxdb:8086/k6 /scripts/mainTest.js
+
+# configure grafana
+# configuration > add data source influxdb, URL : http://influxdb:8086 , database k6
+# import dashbord id 2587  : https://grafana.com/grafana/dashboards/2587
+# https://k6.io/docs/results-visualization/influxdb-+-grafana/#custom-grafana-dashboard
+
+
+networks:
+  k6:
+    name: k6
+  grafana:
+    name: grafana
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    networks:
+      - k6
+      - grafana
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+
+  grafana:
+    image: grafana/grafana:latest
+    networks:
+      - grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/
+
