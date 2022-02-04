@@ -13,6 +13,7 @@ version: '3.5'
 # import dashbord id 2587  : https://grafana.com/grafana/dashboards/2587
 # https://k6.io/docs/results-visualization/influxdb-+-grafana/#custom-grafana-dashboard
 
+# docker-compose -p "grafana" dow
 
 networks:
   k6:
@@ -22,6 +23,7 @@ networks:
 
 services:
   influxdb:
+  # https://hub.docker.com/_/influxdb
     image: influxdb:1.8
     networks:
       - k6
@@ -30,6 +32,9 @@ services:
       - "8086:8086"
     environment:
       - INFLUXDB_DB=k6
+    volumes:
+      - ./target/influxdb/data:/var/lib/influxdb 
+      # - ./target/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf
 
   grafana:
     image: grafana/grafana:latest
@@ -41,6 +46,11 @@ services:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_BASIC_ENABLED=false
-    volumes:
-      - ./grafana:/etc/grafana/provisioning/
+    # volumes:
+    # https://grafana.com/docs/grafana/latest/administration/configure-docker/#default-paths
+    # Dashboards & datasources are not saved in /provisioning
+      # - ./target/grafana/data:/var/lib/grafana
+      # - ./target/grafana/provisioning:/etc/grafana/provisioning
+      # -./target/log/grafana:/var/log/grafana
+
 
