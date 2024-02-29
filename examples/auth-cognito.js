@@ -11,9 +11,10 @@ import { vu } from 'k6/execution';
 
 const data = new SharedArray('users', (() => JSON.parse(open('users.json'))));
 
-const client = cognito.connect('eu-west-1');
 
 export function auth() {
+
+  let client = cognito.connect('us-east-1');
   if (data.length === 0) {
     // GoError & fail() do not increment a metric iteration_failed
     // workaround : add a dummy check
@@ -43,13 +44,15 @@ export function auth() {
   console.log('user: ', username);
 
   try {
+    console.log("Inside try")
     const tokens = client.auth(
       username,
       password,
-      'eu-west-1_exToChangePoolId',
-      'exToChangeClientId',
+      'us-east-1_BldPFSeIR',
+      '741d3jutv63v9b0p62cjv1r3kl',
       { clientMetadata: { test: 'ok' } },
     );
+    console.log(tokens)
     // spread does not work https://github.com/grafana/k6/issues/824
     return Object.assign({}, { username }, tokens);
   } catch (e) {

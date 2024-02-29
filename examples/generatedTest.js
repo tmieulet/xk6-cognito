@@ -10,9 +10,6 @@ export default function main(arg) {
   const token = arg.AccessToken;
   let response;
 
-
-  let response;
-
   response = http.get(
     'https://exToChangeIdGateway.execute-api.eu-west-1.amazonaws.com/dev/example',
     {

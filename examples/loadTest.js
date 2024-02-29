@@ -15,37 +15,37 @@ let authData;
 export default function main() {
   // if the test fails, k6 restarts it directly => workaround : sleep
   sleep(1);
-  if (authData) {
-    console.log('reusing auth');
-  } else {
+ // if (authData) {
+  //  console.log('reusing auth');
+  //} else {
     authData = auth();
-  }
+  //}
 
   // export default function main(arg) {
   // const token = arg.AccessToken;
-  describe(`1. scenario 1 as ${authData.username}`, () => {
+  /*describe(`1. scenario 1 as ${authData.username}`, () => {
     Test(authData);
   });
   describe(`2. scenario 2 as ${authData.username}`, () => {
     //
     Test(authData);
-  });
+  });*/
 }
 
 
-export function handleSummary(data) {
+/*export function handleSummary(data) {
   return {
     [`/scripts/target/result-${testName}.html`]: htmlReport(data),
     stdout: textSummary(data, { indent: ' ', enableColors: true }),
   };
-}
+}*/
 
 // See https://k6.io/docs/using-k6/options
 export const options = {
   stages: [
-    { duration: '1m', target: 5 },
-    { duration: '3m', target: 20 },
-    { duration: '1m', target: 0 },
+    { duration: '1m', target: 1 },
+    //{ duration: '3m', target: 20 },
+    //{ duration: '1m', target: 0 },
   ],
   thresholds: {
     // add some minimal thresholds otherwise

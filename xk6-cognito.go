@@ -5,14 +5,11 @@ import (
 	"context"
 	"fmt"
 	"time"
-
 	cognitosrp "github.com/alexrudd/cognito-srp/v4"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	cip "github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider/types"
-
 
 	// "go.k6.io/k6/js/common"
     "go.k6.io/k6/js/modules"
@@ -22,6 +19,7 @@ import (
 // Register the extension on module initialization, available to
 // import from JS as "k6/x/cognito".
 func init() {
+	fmt.Printf("Inside init");	
     modules.Register("k6/x/cognito", new(Cognito))
 }
 
@@ -29,9 +27,8 @@ func init() {
 type Cognito struct{}
 
 // Client is the Cognito client wrapper.
-type Client struct {
-	ctx      context.Context
-	// https://github.com/aws/aws-sdk-go-v2/blob/main/service/cognitoidentityprovider/api_client.go
+type Client struct {	
+		// https://github.com/aws/aws-sdk-go-v2/blob/main/service/cognitoidentityprovider/api_client.go
     client *cip.Client
 	
 }
@@ -39,13 +36,14 @@ type keyValue map[string]interface{}
 
 
 type AuthOptionalParams struct {
-	// https://stackoverflow.com/questions/2032149/optional-parameters-in-go
+	// https://stackoverflow.com/questions/2032149/optional-parameters-in-go		
 	clientMetadata map[string]string
 	cognitoSecret *string
   }
 
 
 func contains(array []string, element string) bool {
+	fmt.Printf("Inside contains");
 	for _, item := range array {
 		if item == element {
 			return true
@@ -54,10 +52,12 @@ func contains(array []string, element string) bool {
 	return false
 }
 
-func (r *Cognito) Connect(ctx context.Context, region string ) (*Client, error) {
+func (r *Cognito) Connect( region string ) (*Client, error) {
 
+	fmt.Printf("Inside Connect", region);
+	
 	regionAws := config.WithRegion(region)
-	// cred := config.WithCredentialsProvider(aws.AnonymousCredentials{})
+	 //cred := config.WithCredentialsProvider(aws.AnonymousCredentials{})
 
 	// configure cognito identity provider
 	// https://github.com/aws/aws-sdk-go-v2
@@ -70,8 +70,7 @@ func (r *Cognito) Connect(ctx context.Context, region string ) (*Client, error) 
 		return nil, err
 	}
 
-	client := Client{
-		ctx:           ctx,
+	client := Client{	
 		client: cip.NewFromConfig(cfg),
 		
 	}
@@ -87,7 +86,7 @@ func (c *Client) Auth(  username string, password string, poolId string, clientI
 	csrp, _  := cognitosrp.NewCognitoSRP(username, password, poolId, clientId, params.cognitoSecret)
 
 	// initiate auth
-	resp, err := c.client.InitiateAuth(c.ctx, &cip.InitiateAuthInput{
+	resp, err := c.client.InitiateAuth( context.TODO(), &cip.InitiateAuthInput{
 		AuthFlow:       types.AuthFlowTypeUserSrpAuth,
 		ClientId:       aws.String(csrp.GetClientId()),
 		AuthParameters: csrp.GetAuthParams(),
@@ -106,7 +105,7 @@ func (c *Client) Auth(  username string, password string, poolId string, clientI
 			return nil, err
 		}
 
-		resp, err := c.client.RespondToAuthChallenge(c.ctx, &cip.RespondToAuthChallengeInput{
+		resp, err := c.client.RespondToAuthChallenge(context.TODO(), &cip.RespondToAuthChallengeInput{
 			ChallengeName:      types.ChallengeNameTypePasswordVerifier,
 			ChallengeResponses: challengeResponses,
 			ClientId:           aws.String(csrp.GetClientId()),
